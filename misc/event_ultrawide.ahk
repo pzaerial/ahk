@@ -10,32 +10,32 @@
 
 ; Variables
 break := -1
-iterations := 0
 
 ; REQUIRED VARIABLES 
-numberOfHeroes := 3
+numberOfHeroes := 1
 castlePresent := 1  ; boolean
 troopIconSize := 180
 firstTroopCenterX := 750
 deploymentBarBufferSize := 20 ; Size of the buffer between different troop types.
 
 ; REQUIRED VARIABLE TABLE
-;   Level     troopIconSize      firstTroopCenterX    deploymentBarBufferSize
-;    TH7           200                  ???                     ???
-;    TH8           ???                  ???                     ???
-;    TH9           ???                  ???                     ???
-;    TH10          ???                  ???                     ???
-;    TH11          180                  750                     20
-;    TH12          ???                  ???                     ???
-;    TH13          ???                  ???                     ???
+;   Level     numberOfHeroes    troopIconSize     firstTroopCenterX    deploymentBarBufferSize
+;    TH7            1               200                  ???                     ???
+;    TH8            1               ???                  ???                     ???
+;    TH9            2               ???                  ???                     ???
+;    TH10           2               180                  750                     20
+;    TH11           3               180                  750                     20
+;    TH12           3               ???                  ???                     ???
+;    TH13           4               180                  750                     20
 
 ; Activate the current window (Just in case)
 WinGet, activeWindow, ID, A
 WinActivate, ahk_id %activeWindow%
 
-sleep 1000
-
 while break < 0 {
+
+	; 5s buffer to click between iterations
+	sleep 5000
 
 	; Reset after connecting from another device
 	MouseClick, left, 1270, 810
@@ -77,9 +77,6 @@ while break < 0 {
 	sleep 500
 	MouseClick, left, 1700, 1200
 	sleep 3000
-
-	; Track iterations
-	iterations := iterations + 1
 }
 
 ClearUiElements() {

@@ -1,5 +1,7 @@
-; For use with a single troop army. CC or Siege required for it to work because of spacing in bottom bar.
-; Spells are ok.
+; For use with a single troop army. Avoids using spells.
+; DO NOT have other troops or spells, or you will have to adjust troopIconSize and firstTroopCenterX.
+; Could have issues with CC spell, numbers are presented in the table WITHOUT the spell.
+; CC or Siege required for spacing of bottom bar.
 ; Start zoomed in somewhere in the top left half of the map
 ;  then zoom out by using down key on keyboard for alignment purposes.
 
@@ -8,20 +10,29 @@
 
 ; Variables
 break := -1
-iterations := 0
+
+; REQUIRED VARIABLES
+numberOfTroops := 2
+firstTroopCenterX := 580 ; 760
+numberOfHeroes := 4
+castlePresent := 1  ; boolean
+deployCastle := 1 ; boolean
+troopIconSize := 180
+deploymentBarBufferSize := 20 ; Size of the buffer between different troop types.
 
 ; Activate the current window (Just in case)
 WinGet, activeWindow, ID, A
 WinActivate, ahk_id %activeWindow%
 
-sleep 1000
-
 while break < 0 {
+
+	; 5s buffer to click between iterations
+	sleep 5000
 
 	; Reset after connecting from another device
 	MouseClick, left, 1270, 810
 	sleep 3000
-
+	
 	; Close any accidentally opened windows
 	ClearUiElements()
 	sleep 2000
@@ -44,7 +55,7 @@ while break < 0 {
 	sleep 2000
 	DeployZoomedOut()
 
-	; Wait for timer (1 min is all that is necessary in most cases. Finishes with around 1:53 on the clock)
+	; Wait for timer (1 min is all that is necessary in most cases. Finishes with around 1:35 on the clock)
 	sleep 60000
 
 	; Client Out of Sync Prompt
@@ -58,9 +69,6 @@ while break < 0 {
 	sleep 500
 	MouseClick, left, 1700, 1200
 	sleep 3000
-
-	; Track iterations
-	iterations := iterations + 1
 }
 
 ClearUiElements() {
@@ -95,51 +103,71 @@ ZoomOut() {
 
 ; Deploy at edge of map, spread out, from the furthest zoomed out state.
 DeployZoomedOut() {
-	; Mass of one big troop, spread out in a line.
-	; Select them
-	MouseClick, left, 750, 1250
-	sleep 50
-	; Deploy them
-	MouseClick, left, 1480, 80
-	sleep 150
-	MouseClick, left, 1375, 154
-	sleep 250
-	MouseClick, left, 1270, 228
-	sleep 150
-	MouseClick, left, 1165, 302
-	sleep 250
-	MouseClick, left, 1060, 376
-	sleep 150
-	MouseClick, left, 955, 450
-	sleep 250
-	MouseClick, left, 850, 524
-	sleep 150
-	MouseClick, left, 745, 598
-	sleep 250
-	MouseClick, left, 750, 610
-	sleep 150
-	MouseClick, left, 790, 790
-	sleep 250
+	; Global definitions
+	global numberOfTroops, numberOfHeroes, castlePresent, deployCastle, troopIconSize, firstTroopCenterX, deploymentBarBufferSize
 
-	; Heroic/Special (assumes in 3rd-6th slots)
-	; one
-	MouseClick, left, 1140, 1270
-	sleep 50
-	MouseClick, left, 1060, 375
-	sleep 250
-	; two 
-	MouseClick, left, 1340, 1270
-	sleep 50
-	MouseClick, left, 1050, 378
-	sleep 150
-	; three 
-	MouseClick, left, 1540, 1270
-	sleep 50
-	MouseClick, left, 1076, 371
-	sleep 250
-	; four
-	MouseClick, left, 1740, 1270
-	sleep 50
-	MouseClick, left, 1066, 378
-	sleep 150
+	Loop, %numberOfTroops%
+    {
+        ; Calculate the X position of the current troop icon
+        currentTroopX := firstTroopCenterX + ((A_Index - 1) * troopIconSize)
+        
+        MouseClick, left, currentTroopX, 1250
+        sleep 50
+        
+        ClickOnLine(1480, 80, 790, 790, 8) 
+        sleep 250
+    }
+
+	; Figure out CC Location, accounting for slight offset.
+	castleBaseLocation := firstTroopCenterX + (numberOfTroops * troopIconSize) + deploymentBarBufferSize
+
+	; Deploy Castle at midpoint of hero deployment line
+	if (castlePresent && deployCastle) {
+		MouseClick, left, castleBaseLocation, 1250
+		sleep 50
+		MouseClick, left, 1080, 381
+		sleep 150
+	}
+
+	; Heroic/Special
+    firstHeroLocation := castlePresent ? castleBaseLocation + troopIconSize + deploymentBarBufferSize : castleBaseLocation
+    Loop, %numberOfHeroes%
+    {
+        heroOffset := (A_Index - 1) * troopIconSize
+        MouseClick, left, firstHeroLocation + heroOffset, 1250
+        sleep 50
+        MouseClick, left, 1060 + ((A_Index - 1) * 10), 375 + ((A_Index - 1) * 3)
+        sleep 150
+    }
+
+
+	; Cast all spells in the first spell slot, based on offset from heroes.
+	spellLocation := firstHeroLocation + (numberOfHeroes * troopIconSize) + deploymentBarBufferSize
+    MouseClick, left, spellLocation, 1250
+    sleep 50
+    ClickOnLine(1820, 370, 1480, 850, 5)
+    sleep 250
+}
+
+ClickOnLine(startX, startY, endX, endY, numClicks) {
+    ; Calculate the differences between the start and end points
+    deltaX := endX - startX
+    deltaY := endY - startY
+    
+    ; Calculate step sizes
+    stepX := deltaX / (numClicks - 1)
+    stepY := deltaY / (numClicks - 1)
+
+    ; Perform the clicks at each point along the line
+    Loop, %numClicks% {
+        ; Calculate the current click position
+        currentX := startX + (stepX * (A_Index - 1))
+        currentY := startY + (stepY * (A_Index - 1))
+
+        ; Click the current position
+        MouseClick, left, currentX, currentY
+        
+        ; Add delay between clicks (adjust if necessary)
+        sleep, 150
+    }
 }

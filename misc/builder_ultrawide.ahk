@@ -1,18 +1,24 @@
+; For use with a single troop army.
+; Start zoomed in somewhere in the top left half of the map
+;  then zoom out by using down key on keyboard for alignment purposes.
+
 ^c:: break++
 ^x::
 
+; Variables 
 break := -1
-iterations := 0
-doDeployOption1 := 1
-doDeployOption2 := 1
+
+; REQUIRED VARIABLES
+numberOfCamps := 6 ;INCLUDING REINFORCEMENT CAMP
 
 ; Activate the current window (Just in case)
 WinGet, activeWindow, ID, A
 WinActivate, ahk_id %activeWindow%
 
-sleep 1000
-
 while break < 0 {
+
+	; 5s buffer to click between iterations
+	sleep 5000
 
 	; Reset after connecting from another device
 	MouseClick, left, 1270, 810
@@ -30,151 +36,92 @@ while break < 0 {
 	MouseClick, left, 2400, 900
 	sleep 7500
 
-	; Deploy Part 1
-	if (doDeployOption1) {
-		; Select Option 1
-		MouseClick, left, 800, 1200
-		sleep 250
-		; Deploy Option 1 (a few times to be sure)
-		MouseClick, left, 550, 650
-		sleep 250
-		MouseClick, left, 550, 650
-		sleep 250
-		MouseClick, left, 550, 650
-		sleep 250
-		MouseClick, left, 550, 650
-		sleep 250
-	}
+	DeployDefaultZoom()
+	sleep 2000
+	DeployDefaultZoom()
 
-	; Deploy Part 2
-	if (doDeployOption2) {
-		; Select Option 2
-		MouseClick, left, 1100, 1200
-		sleep 250
-		; Deployment 2 choice (do this multiple times in case of obstacles)
-		DeploySemicircleFew()
-        DeploySemicircleFew()
-        DeploySemicircleFew()
-	}
-
-	; Wait for timer (1 min should be all we need)
+	; Wait for timer (1 min should be all we need to finish first stage of base.)
 	sleep 60000
 	
 	; Surrender and Return
-	MouseClick, left, 650, 1050 ; This actually misses low, but it works for the 2 stage bases. Fix later.
+	MouseClick, left, 630, 1050
 	sleep 250
 	MouseClick, left, 1950, 900
 	sleep 500
-	MouseClick, left, 1700, 1175
+	MouseClick, left, 1700, 1200
 	sleep 3000
-
-	; Track iterations
-	iterations := iterations + 1
 }
 
 ClearUiElements() {
 	; Clear any UI elements
-	MouseClick, left, 2500, 120 ; Events window
+	
+	MouseClick, left, 2610, 140 ; Profile window
+	sleep 250
+	MouseClick, left, 2590, 180 ; League window
 	sleep 250
 	MouseClick, left, 1480, 650 ; Chat
 	sleep 250
+	MouseClick, left, 2460, 160 ; Defense Log window
+	sleep 250
+	MouseClick, left, 2670, 230 ; Army window
+	sleep 250
 	MouseClick, left, 2650, 120 ; Battle pass window
 	sleep 250
-	MouseClick, left, 2660, 230 ; Training window
+	MouseClick, left, 2500, 120 ; Events window
 	sleep 250
 
 	; Clear any UI elements by clicking on dead space
-	MouseClick, left, 2860, 500
+	MouseClick, left, 2860, 200
 	sleep 250
-	MouseClick, left, 2860, 500
+	MouseClick, left, 2860, 200
 	sleep 250
 }
 
-DeploySemicircleFew() {
+DeployDefaultZoom() {
+	; Global definitions
+	global numberOfCamps
+
+	; Hero 
+	MouseClick, left, 735, 1250
+    sleep 50
+	MouseClick, left, 550, 830
+    sleep 250
+
+	; Troops 
 	MouseClick, left, 950, 1250
-	sleep 250
-	MouseClick, left, 1300, 80
-	sleep 250
+    sleep 50
+    ClickOnLine(1390, 90, 790, 790, numberOfCamps, 1)
+    sleep 250
 
-	MouseClick, left, 1150, 1250
-	sleep 250
-	MouseClick, left, 1050, 200
-	sleep 250
-
-	MouseClick, left, 1350, 1250
-	sleep 250
-	MouseClick, left, 900, 450
-	sleep 250
-
-	MouseClick, left, 1550, 1250
-	sleep 250
-	MouseClick, left, 900, 730
-	sleep 250
+	; Troop Abilities
+	startX := 950
+	endX := startX + ((numberOfCamps - 1) * 200)
+    ClickOnLine(startX, 1250, endX, 1250, numberOfCamps, 2)
 	
-	MouseClick, left, 1750, 1250
-	sleep 250
-	MouseClick, left, 950, 850
-	sleep 250
-
-	MouseClick, left, 1950, 1250
-	sleep 250
-	MouseClick, left, 1000, 925
-	sleep 250
-
-	MouseClick, left, 2150, 1250
-	sleep 250
-	MouseClick, left, 1000, 975
-	sleep 250
 }
 
-DeploySemicircleMany() {
-	MouseClick, left, 1600, 582
-	sleep 250
-	MouseClick, left, 1525, 510
-	sleep 250
-	MouseClick, left, 1570, 452
-	sleep 250
-	MouseClick, left, 1400, 400
-	sleep 250
-	MouseClick, left, 1300, 500
-	sleep 250
-	MouseClick, left, 1200, 600
-	sleep 250
-	MouseClick, left, 1290, 800
-	sleep 250
-	MouseClick, left, 1360, 900
-	sleep 250
-	MouseClick, left, 1400, 950
-	sleep 250
-	MouseClick, left, 1420, 1000
-	sleep 250
-	MouseClick, left, 1520, 1100
-}
+ClickOnLine(startX, startY, endX, endY, numClicks, clicksPerStop) {
+    ; Calculate the differences between the start and end points
+    deltaX := endX - startX
+    deltaY := endY - startY
+    
+    ; Calculate step sizes
+    stepX := deltaX / (numClicks - 1)
+    stepY := deltaY / (numClicks - 1)
 
-DeployTriads() {
-	;todo
-}
+    ; Perform the clicks at each point along the line
+    Loop, %numClicks% {
+        ; Calculate the current click position
+        currentX := startX + (stepX * (A_Index - 1))
+        currentY := startY + (stepY * (A_Index - 1))
 
-; Deploy Option 2 Smooth Line Top to Left
-DeploySmoothLine() {
-	MouseClick, left, 1500, 100
-	sleep 250
-	MouseClick, left, 1420, 150
-	sleep 250
-	MouseClick, left, 1360, 200
-	sleep 250
-	MouseClick, left, 1280, 250
-	sleep 250
-	MouseClick, left, 1200, 300
-	sleep 250
-	MouseClick, left, 1120, 350
-	sleep 250
-	MouseClick, left, 1040, 400
-	sleep 250
-	MouseClick, left, 960, 450
-	sleep 250
-	MouseClick, left, 880, 500
-	sleep 250
-	MouseClick, left, 800, 600
-	sleep 250
+        ; Click the current position clicksPerStop times.
+		Loop, %clicksPerStop% {
+        	MouseClick, left, currentX, currentY
+        	sleep, 150
+		}
+        
+        ; Add delay between clicks (adjust if necessary)
+        sleep, 150
+    }
 }
