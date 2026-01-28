@@ -13,10 +13,11 @@ break := -1
 
 ; REQUIRED VARIABLES
 numberOfTroops := 2
-firstTroopCenterX := 580 ; 760
+firstTroopCenterX := 760
 numberOfHeroes := 4
 castlePresent := 1  ; boolean
 deployCastle := 1 ; boolean
+numberOfSpells := 11 
 troopIconSize := 180
 deploymentBarBufferSize := 20 ; Size of the buffer between different troop types.
 
@@ -104,7 +105,7 @@ ZoomOut() {
 ; Deploy at edge of map, spread out, from the furthest zoomed out state.
 DeployZoomedOut() {
 	; Global definitions
-	global numberOfTroops, numberOfHeroes, castlePresent, deployCastle, troopIconSize, firstTroopCenterX, deploymentBarBufferSize
+	global numberOfTroops, numberOfHeroes, castlePresent, deployCastle, troopIconSize, firstTroopCenterX, deploymentBarBufferSize, numberOfSpells
 
 	Loop, %numberOfTroops%
     {
@@ -145,7 +146,8 @@ DeployZoomedOut() {
 	spellLocation := firstHeroLocation + (numberOfHeroes * troopIconSize) + deploymentBarBufferSize
     MouseClick, left, spellLocation, 1250
     sleep 50
-    ClickOnLine(1820, 370, 1480, 850, 5)
+	spellsPerLine := (numberOfSpells / 2) + 1
+    ClickOnLine(1820, 370, 1480, 850, spellsPerLine)
     sleep 250
 }
 
