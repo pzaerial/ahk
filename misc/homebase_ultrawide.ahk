@@ -12,7 +12,7 @@
 break := -1
 
 ; REQUIRED VARIABLES
-numberOfTroops := 2
+numberOfTroops := 3
 firstTroopCenterX := 760
 numberOfHeroes := 4
 castlePresent := 1  ; boolean
