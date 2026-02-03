@@ -97,7 +97,8 @@ MainLoop() {
         }
 
         ; Buffer for battle timers if looping through each window doesn't take long enough.
-        sleep 60000
+        ; 60000 for single instance, for 4+ instances don't sleep
+        ; sleep 60000
     }
 }
 
@@ -121,7 +122,7 @@ ClearUI(winData) {
 	global menuBarOffset
 
     ; 1s buffer to click between iterations
-	sleep 1000
+	sleep 500
 
 	; Reset after connecting from another device
 	coords := ToAbsoluteCoords(winData, 790/2415, 800/1440)
@@ -130,7 +131,7 @@ ClearUI(winData) {
 
 	; Close any accidentally opened windows
 	ClearUiElements(winData)
-	sleep 1000
+	sleep 50
 
 	; Click Start
 	coords := ToAbsoluteCoords(winData, 150/2415, 1200/1440)
@@ -145,7 +146,7 @@ ClearUI(winData) {
 	; Click Attack
 	coords := ToAbsoluteCoords(winData, 2130/2415, 1250/1440)
 	MouseClick, left, coords.x, coords.y
-	sleep 5500
+	sleep 4000
 }
 
 ClearUiElements(winData) {
@@ -154,34 +155,34 @@ ClearUiElements(winData) {
 	; Profile/League window
 	coords := ToAbsoluteCoords(winData, 2100/2415, 142/1440)
 	MouseClick, left, coords.x, coords.y
-	sleep 250
+	sleep 50
 
 	; Battle Window
 	coords := ToAbsoluteCoords(winData, 2220/2415, 100/1440)
 	MouseClick, left, coords.x, coords.y
-	sleep 250
+	sleep 50
 
 	; Chat
 	coords := ToAbsoluteCoords(winData, 990/2415, 650/1440)
 	MouseClick, left, coords.x, coords.y
-	sleep 250
+	sleep 50
 
 	; Battle pass window
 	coords := ToAbsoluteCoords(winData, 2140/2415, 115/1440)
 	MouseClick, left, coords.x, coords.y
-	sleep 250
+	sleep 50
 
 	; Training window
 	coords := ToAbsoluteCoords(winData, 2330/2415, 150/1440)
 	MouseClick, left, coords.x, coords.y
-	sleep 250
+	sleep 50
 
 	; Clear any UI elements by clicking on dead space
 	coords := ToAbsoluteCoords(winData, 2400/2415, 400/1440)
 	MouseClick, left, coords.x, coords.y
-	sleep 250
+	sleep 50
 	MouseClick, left, coords.x, coords.y
-	sleep 250
+	sleep 50
 }
 
 ; Deploy at edge of map, spread out, from the furthest zoomed out state.
@@ -204,7 +205,7 @@ DeployZoomedOut(winData) {
         sleep 50
 
         ClickOnLine(winData, 1050/2415, 40/1440, 240/2415, 715/1440, 8)
-        sleep 250
+        sleep 50
     }
 
 	; Figure out CC Location, accounting for slight offset.
@@ -217,7 +218,7 @@ DeployZoomedOut(winData) {
 		sleep 50
 		coords := ToAbsoluteCoords(winData, 630/2415, 381/1440)
 		MouseClick, left, coords.x, coords.y
-		sleep 150
+		sleep 50
 	}
 
 	; Heroic/Special
@@ -230,7 +231,7 @@ DeployZoomedOut(winData) {
         sleep 50
         coords := ToAbsoluteCoords(winData, 630/2415 + ((A_Index - 1) * 10/2415), 375/1440 + ((A_Index - 1) * 3/1440))
         MouseClick, left, coords.x, coords.y
-        sleep 150
+        sleep 50
     }
 
 
@@ -241,7 +242,7 @@ DeployZoomedOut(winData) {
     sleep 50
 	spellsPerLine := (numSpells / 2) + 1
     ClickOnLine(winData, 1390/2415, 490/1440, 975/2415, 890/1440, spellsPerLine)
-    sleep 250
+    sleep 50
 }
 
 ClickOnLine(winData, startFracX, startFracY, endFracX, endFracY, numClicks) {
@@ -264,7 +265,7 @@ ClickOnLine(winData, startFracX, startFracY, endFracX, endFracY, numClicks) {
         MouseClick, left, coords.x, coords.y
 
         ; Add delay between clicks (adjust if necessary)
-        sleep, 150
+        sleep, 25
     }
 }
 
@@ -272,7 +273,7 @@ ReturnHome(winData) {
     ; Client Out of Sync Prompt
 	coords := ToAbsoluteCoords(winData, 790/2415, 800/1440)
 	MouseClick, left, coords.x, coords.y
-	sleep 3000
+	sleep 2000
 
 	; Surrender and Return
 	coords := ToAbsoluteCoords(winData, 150/2415, 1050/1440)
@@ -283,5 +284,5 @@ ReturnHome(winData) {
 	sleep 500
 	coords := ToAbsoluteCoords(winData, 1200/2415, 1200/1440)
 	MouseClick, left, coords.x, coords.y
-	sleep 3000
+	sleep 2000
 }
