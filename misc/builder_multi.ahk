@@ -214,7 +214,7 @@ Deploy(winData) {
 	sleep 50
 
 	; Deploy in 2 lines
-	lineClicks := Ceil((totalCamps) / 2)
+	lineClicks := Ceil((numCamps) / 2) ; In practice numCamps is better than totalCamps here.
 	ClickOnLine(winData, 270/2415, 245/1440, 970/2415, 65/1440, lineClicks, 1)
 	sleep 50
 	ClickOnLine(winData, 1530/2415, 50/1440, 2180/2415, 420/1440, lineClicks, 1)
