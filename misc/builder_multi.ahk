@@ -118,7 +118,7 @@ MainLoop() {
         }
 
         ; Phase 1 battle buffer timer if deployment on all does not take long enough.
-        ; sleep 45000 
+        sleep 25000 
 
         ; Start battle 2 on all
         for index, winData in registeredWindows {
@@ -130,7 +130,7 @@ MainLoop() {
         }
 
         ; Phase 2 battle buffer timer if not running on multiple windows.
-        ; sleep 45000
+        ; sleep 15000
     }
 }
 
