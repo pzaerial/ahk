@@ -1,4 +1,5 @@
 ; Multi-window homebase automation script
+; BS windows must not be sized such that there are black bars on the side.
 ; Ctrl+Z: Register window | Ctrl+X: Start loop | Ctrl+C: Break
 
 ; Use absolute coordinates (based on active display)
@@ -26,6 +27,18 @@ tempWinH := 0
     WinGet, tempWinId, ID, A
     WinGetTitle, tempWinName, A
     WinGetPos, tempWinX, tempWinY, tempWinW, tempWinH, A
+
+    ; Check if window is already registered
+    foundIndex := FindRegisteredWindow(tempWinId)
+    if (foundIndex > 0) {
+        MsgBox, 4, Unregister Window, Window "%tempWinName%" is already registered.`n`nDo you want to unregister it?
+        IfMsgBox Yes
+        {
+            registeredWindows.RemoveAt(foundIndex)
+        }
+        return
+    }
+
     ShowRegisterGui()
 return
 
@@ -78,6 +91,15 @@ RegisterGuiClose:
     Gui, Register:Destroy
 return
 
+FindRegisteredWindow(winId) {
+    global registeredWindows
+    for index, winData in registeredWindows {
+        if (winData.id = winId)
+            return index
+    }
+    return 0
+}
+
 ; Converts fractional coords (e.g., 750/2415) to absolute screen coords with menu bar offset
 ToAbsoluteCoords(winData, fracX, fracY) {
     global menuBarOffset
@@ -114,8 +136,9 @@ HomeBaseLoop(winData) {
     ; Game Loop
     ReturnHome(winData)
     ClearUI(winData)
-    DeployZoomedOut(winData)
-    DeployZoomedOut(winData)
+    SearchMatch(winData)
+    Deploy(winData)
+    Deploy(winData)
 }
 
 ClearUI(winData) {
@@ -129,10 +152,40 @@ ClearUI(winData) {
 	MouseClick, left, coords.x, coords.y
 	sleep 2000
 
-	; Close any accidentally opened windows
-	ClearUiElements(winData)
+	; Close Profile/League window
+	coords := ToAbsoluteCoords(winData, 2100/2415, 142/1440)
+	MouseClick, left, coords.x, coords.y
 	sleep 50
 
+	; Close Battle Window
+	coords := ToAbsoluteCoords(winData, 2220/2415, 100/1440)
+	MouseClick, left, coords.x, coords.y
+	sleep 50
+
+	; Close Chat
+	coords := ToAbsoluteCoords(winData, 990/2415, 650/1440)
+	MouseClick, left, coords.x, coords.y
+	sleep 50
+
+	; Close Battle pass window
+	coords := ToAbsoluteCoords(winData, 2140/2415, 115/1440)
+	MouseClick, left, coords.x, coords.y
+	sleep 50
+
+	; Close Training window
+	coords := ToAbsoluteCoords(winData, 2330/2415, 150/1440)
+	MouseClick, left, coords.x, coords.y
+	sleep 50
+
+	; Clear any remaining UI elements by clicking on dead space
+	coords := ToAbsoluteCoords(winData, 2400/2415, 400/1440)
+	MouseClick, left, coords.x, coords.y
+	sleep 50
+	MouseClick, left, coords.x, coords.y
+	sleep 50
+}
+
+SearchMatch(winData) {
 	; Click Start
 	coords := ToAbsoluteCoords(winData, 150/2415, 1200/1440)
 	MouseClick, left, coords.x, coords.y
@@ -149,44 +202,8 @@ ClearUI(winData) {
 	sleep 4000
 }
 
-ClearUiElements(winData) {
-	global menuBarOffset
-
-	; Profile/League window
-	coords := ToAbsoluteCoords(winData, 2100/2415, 142/1440)
-	MouseClick, left, coords.x, coords.y
-	sleep 50
-
-	; Battle Window
-	coords := ToAbsoluteCoords(winData, 2220/2415, 100/1440)
-	MouseClick, left, coords.x, coords.y
-	sleep 50
-
-	; Chat
-	coords := ToAbsoluteCoords(winData, 990/2415, 650/1440)
-	MouseClick, left, coords.x, coords.y
-	sleep 50
-
-	; Battle pass window
-	coords := ToAbsoluteCoords(winData, 2140/2415, 115/1440)
-	MouseClick, left, coords.x, coords.y
-	sleep 50
-
-	; Training window
-	coords := ToAbsoluteCoords(winData, 2330/2415, 150/1440)
-	MouseClick, left, coords.x, coords.y
-	sleep 50
-
-	; Clear any UI elements by clicking on dead space
-	coords := ToAbsoluteCoords(winData, 2400/2415, 400/1440)
-	MouseClick, left, coords.x, coords.y
-	sleep 50
-	MouseClick, left, coords.x, coords.y
-	sleep 50
-}
-
 ; Deploy at edge of map, spread out, from the furthest zoomed out state.
-DeployZoomedOut(winData) {
+Deploy(winData) {
 	global menuBarOffset, firstTroopCenterX, troopIconSize, deploymentBarBufferSize
 
 	numTroops := winData.numTroops
@@ -245,6 +262,24 @@ DeployZoomedOut(winData) {
     sleep 50
 }
 
+ReturnHome(winData) {
+    ; Client Out of Sync Prompt
+	coords := ToAbsoluteCoords(winData, 790/2415, 800/1440)
+	MouseClick, left, coords.x, coords.y
+	sleep 2000
+
+	; Surrender and Return
+	coords := ToAbsoluteCoords(winData, 150/2415, 1050/1440)
+	MouseClick, left, coords.x, coords.y
+	sleep 250
+	coords := ToAbsoluteCoords(winData, 1475/2415, 900/1440)
+	MouseClick, left, coords.x, coords.y
+	sleep 500
+	coords := ToAbsoluteCoords(winData, 1200/2415, 1200/1440)
+	MouseClick, left, coords.x, coords.y
+	sleep 2000
+}
+
 ClickOnLine(winData, startFracX, startFracY, endFracX, endFracY, numClicks) {
     ; Calculate the differences between the start and end points
     deltaX := endFracX - startFracX
@@ -267,22 +302,4 @@ ClickOnLine(winData, startFracX, startFracY, endFracX, endFracY, numClicks) {
         ; Add delay between clicks (adjust if necessary)
         sleep, 25
     }
-}
-
-ReturnHome(winData) {
-    ; Client Out of Sync Prompt
-	coords := ToAbsoluteCoords(winData, 790/2415, 800/1440)
-	MouseClick, left, coords.x, coords.y
-	sleep 2000
-
-	; Surrender and Return
-	coords := ToAbsoluteCoords(winData, 150/2415, 1050/1440)
-	MouseClick, left, coords.x, coords.y
-	sleep 250
-	coords := ToAbsoluteCoords(winData, 1475/2415, 900/1440)
-	MouseClick, left, coords.x, coords.y
-	sleep 500
-	coords := ToAbsoluteCoords(winData, 1200/2415, 1200/1440)
-	MouseClick, left, coords.x, coords.y
-	sleep 2000
 }
