@@ -214,19 +214,11 @@ Deploy(winData) {
 	sleep 50
 
 	; Deploy in 2 lines
-	lineClicks := Ceil((totalCamps - 2) / 2)
+	lineClicks := Ceil((totalCamps) / 2)
 	ClickOnLine(winData, 270/2415, 245/1440, 970/2415, 65/1440, lineClicks, 1)
 	sleep 50
 	ClickOnLine(winData, 1530/2415, 50/1440, 2180/2415, 420/1440, lineClicks, 1)
 	sleep 50
-
-	; Deploy 2 leftovers at bottom
-	coords := ToAbsoluteCoords(winData, 1730/2415, 1040/1440)
-	MouseClick, left, coords.x, coords.y
-	sleep 50
-	coords := ToAbsoluteCoords(winData, 550/2415, 1040/1440)
-	MouseClick, left, coords.x, coords.y
-	sleep 5000
 
 	; Activate Troop Abilities
 	ClickOnLine(winData, troopStartX, 1250/1440, troopEndX, 1250/1440, totalCamps, 2)
