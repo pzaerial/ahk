@@ -110,11 +110,12 @@ MainLoop() {
             if (break != 0)
                 break
             ActivateWindow(winData)
+            sleep 1000
             ReturnHome(winData)
             ClearUI(winData)
             SearchMatch(winData)
-            Deploy(winData)
-            Deploy(winData)
+            DeployExact(winData)
+            DeployExact(winData)
         }
 
         ; Phase 1 battle buffer timer if deployment on all does not take long enough.
@@ -125,8 +126,8 @@ MainLoop() {
             if (break != 0)
                 break
             ActivateWindow(winData)
-            Deploy(winData)
-            Deploy(winData)
+            DeployExact(winData)
+            DeployExact(winData)
         }
 
         ; Phase 2 battle buffer timer if not running on multiple windows.
@@ -189,15 +190,12 @@ SearchMatch(winData) {
 	sleep 4000
 }
 
-Deploy(winData) {
-	global firstHeroCenterX, troopIconSize, deploymentBarBufferSize
-
-	heroActive := winData.heroActive
-	numCamps := winData.numCamps
-	numReinforcementCamps := winData.numReinforcementCamps
-	totalCamps := numCamps + numReinforcementCamps
+; Assumes max of 8 camps, placing exactly.
+DeployExact(winData) {
+    global firstHeroCenterX
 
 	; Hero
+    heroActive := winData.heroActive
 	if (heroActive) {
 		coords := ToAbsoluteCoords(winData, firstHeroCenterX, 1250/1440)
 		MouseClick, left, coords.x, coords.y
@@ -206,6 +204,59 @@ Deploy(winData) {
 		MouseClick, left, coords.x, coords.y
 		sleep 250
 	}
+
+    ; Troops
+    clicksArray := [ [440/2415, 1250/1440]  ; Troop 1
+                  , [270/2415, 245/1440]    ; Deploy 1
+                  , [630/2415, 1250/1440]   ; Troop 2
+                  , [620/2415, 155/1440]    ; Deploy 2
+                  , [830/2415, 1250/1440]   ; Troop 3
+                  , [970/2415, 65/1440]     ; Deploy 3
+                  , [1020/2415, 1250/1440]  ; Troop 4
+                  , [1530/2415, 50/1440]    ; Deploy 4
+                  , [1210/2415, 1250/1440]  ; Troop 5
+                  , [1855/2415, 235/1440]   ; Deploy 5
+                  , [1410/2415, 1250/1440]  ; Troop 6
+                  , [2180/2415, 420/1440]   ; Deploy 6
+                  , [1600/2415, 1250/1440]  ; Troop 7
+                  , [270/2415, 245/1440]    ; Deploy 7
+                  , [1800/2415, 1250/1440]  ; Troop 8
+                  , [2180/2415, 420/1440]]  ; Deploy 8
+    for index, coords in clicksArray {
+        absCoords := ToAbsoluteCoords(winData, coords[1], coords[2])
+        MouseClick, left, absCoords.x, absCoords.y
+        sleep 50
+    }
+
+    ; Abilities
+    Loop, % clicksArray.Length() {
+        if (Mod(A_Index - 1, 2) = 0) { ; Even indexes from click list.
+            absCoords := ToAbsoluteCoords(winData, clicksArray[A_Index][1], clicksArray[A_Index][2])
+            MouseClick, left, absCoords.x, absCoords.y
+            sleep 50
+        }
+    }
+}
+
+; Respects settings.
+DeployLines(winData) {
+	global firstHeroCenterX, troopIconSize, deploymentBarBufferSize
+
+	; Hero
+	if (heroActive) {
+	heroActive := winData.heroActive
+		coords := ToAbsoluteCoords(winData, firstHeroCenterX, 1250/1440)
+		MouseClick, left, coords.x, coords.y
+		sleep 50
+		coords := ToAbsoluteCoords(winData, 50/2415, 750/1440)
+		MouseClick, left, coords.x, coords.y
+		sleep 250
+	}
+
+    ; Troops
+	numCamps := winData.numCamps
+	numReinforcementCamps := winData.numReinforcementCamps
+	totalCamps := numCamps + numReinforcementCamps
 
 	; Select Troops
 	troopStartX := firstHeroCenterX + troopIconSize + deploymentBarBufferSize

@@ -59,7 +59,7 @@ ShowRegisterGui() {
     hasCastle := 1
     deployCastle := 1
     numHero := 4
-    numSpell := 11
+    numSpell := 6
 
     Gui, Register:New, , Register Window
     Gui, Register:Add, Text, , Window: %tempWinName%
