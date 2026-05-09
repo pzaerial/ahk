@@ -1,12 +1,11 @@
-; Multi-window homebase automation script
+; Single-window homebase automation script
 ; BS windows must not be sized such that there are black bars on the side, nor sidebar open.
-; Ctrl+Z: Register window | Ctrl+X: Start loop | Ctrl+C: Break
+; Ctrl+Z: Open settings | Ctrl+X: Start loop on active window | Ctrl+C: Break
 
 ; Use absolute coordinates (based on active display)
 CoordMode, Mouse, Screen
 
 break := -1
-registeredWindows := []
 menuBarOffset := 30
 
 ; Fixed layout values (as fractions of 2415x1440)
@@ -14,91 +13,57 @@ firstTroopCenterX := 250/2415
 troopIconSize := 180/2415
 deploymentBarBufferSize := 20/2415
 
-tempWinId := ""
-tempWinName := ""
-tempWinX := 0
-tempWinY := 0
-tempWinW := 0
-tempWinH := 0
+; Configurable settings (defaults used unless overridden via Ctrl+Z settings window)
+numTroops := 2
+hasCastle := 1
+deployCastle := 0
+numHero := 4
+numSpell := 11
 
 ^c:: break++
 
 ^z::
-    WinGet, tempWinId, ID, A
-    WinGetTitle, tempWinName, A
-    WinGetPos, tempWinX, tempWinY, tempWinW, tempWinH, A
-
-    ; Check if window is already registered
-    foundIndex := FindRegisteredWindow(tempWinId)
-    if (foundIndex > 0) {
-        MsgBox, 4, Unregister Window, Window "%tempWinName%" is already registered.`n`nDo you want to unregister it?
-        IfMsgBox Yes
-        {
-            registeredWindows.RemoveAt(foundIndex)
-        }
-        return
-    }
-
-    ShowRegisterGui()
+    ShowSettingsGui()
 return
 
 ^x::
-    windowCount := registeredWindows.Length()
-    if (windowCount = 0) {
-        MsgBox, No windows registered! Press Ctrl+Z on each window first.
-        return
-    }
     break := 0
     MainLoop()
 return
 
-ShowRegisterGui() {
-    global tempWinName, tempWinW, tempWinH
+ShowSettingsGui() {
+    global numTroops, hasCastle, deployCastle, numHero, numSpell
 
-    numTroops := 2
-    hasCastle := 1
-    deployCastle := 0
-    numHero := 4
-    numSpell := 11
-
-    Gui, Register:New, , Register Window
-    Gui, Register:Add, Text, , Window: %tempWinName%
-    Gui, Register:Add, Text, , Size: %tempWinW% x %tempWinH%
-    Gui, Register:Add, Text, w200, ---------------------------------
-    Gui, Register:Add, Text, , Number of Troops:
-    Gui, Register:Add, Edit, vNumTroopsInput w100, %numTroops%
-    Gui, Register:Add, Text, , Has Castle (0/1):
-    Gui, Register:Add, Edit, vHasCastleInput w100, %hasCastle%
-    Gui, Register:Add, Text, , Deploy Castle (0/1):
-    Gui, Register:Add, Edit, vDeployCastleInput w100, %deployCastle%
-    Gui, Register:Add, Text, , Number of Heroes:
-    Gui, Register:Add, Edit, vNumHeroInput w100, %numHero%
-    Gui, Register:Add, Text, , Number of Spells:
-    Gui, Register:Add, Edit, vNumSpellInput w100, %numSpell%
-    Gui, Register:Add, Button, Default gRegisterSubmit w100, OK
-    Gui, Register:Add, Button, gRegisterCancel x+10 w100, Cancel
-    Gui, Register:Show
+    Gui, Settings:New, , Settings
+    Gui, Settings:Add, Text, , Number of Troops:
+    Gui, Settings:Add, Edit, vNumTroopsInput w100, %numTroops%
+    Gui, Settings:Add, Text, , Has Castle (0/1):
+    Gui, Settings:Add, Edit, vHasCastleInput w100, %hasCastle%
+    Gui, Settings:Add, Text, , Deploy Castle (0/1):
+    Gui, Settings:Add, Edit, vDeployCastleInput w100, %deployCastle%
+    Gui, Settings:Add, Text, , Number of Heroes:
+    Gui, Settings:Add, Edit, vNumHeroInput w100, %numHero%
+    Gui, Settings:Add, Text, , Number of Spells:
+    Gui, Settings:Add, Edit, vNumSpellInput w100, %numSpell%
+    Gui, Settings:Add, Button, Default gSettingsSubmit w100, OK
+    Gui, Settings:Add, Button, gSettingsCancel x+10 w100, Cancel
+    Gui, Settings:Show
 }
 
-RegisterSubmit:
-    Gui, Register:Submit
-    windowData := {id: tempWinId, name: tempWinName, x: tempWinX, y: tempWinY, width: tempWinW, height: tempWinH, numTroops: NumTroopsInput, hasCastle: HasCastleInput, deployCastle: DeployCastleInput, numHero: NumHeroInput, numSpell: NumSpellInput}
-    registeredWindows.Push(windowData)
+SettingsSubmit:
+    Gui, Settings:Submit
+    numTroops := NumTroopsInput
+    hasCastle := HasCastleInput
+    deployCastle := DeployCastleInput
+    numHero := NumHeroInput
+    numSpell := NumSpellInput
+    Gui, Settings:Destroy
 return
 
-RegisterCancel:
-RegisterGuiClose:
-    Gui, Register:Destroy
+SettingsCancel:
+SettingsGuiClose:
+    Gui, Settings:Destroy
 return
-
-FindRegisteredWindow(winId) {
-    global registeredWindows
-    for index, winData in registeredWindows {
-        if (winData.id = winId)
-            return index
-    }
-    return 0
-}
 
 ; Converts fractional coords (e.g., 750/2415) to absolute screen coords with menu bar offset
 ToAbsoluteCoords(winData, fracX, fracY) {
@@ -109,18 +74,15 @@ ToAbsoluteCoords(winData, fracX, fracY) {
 }
 
 MainLoop() {
-    global break, registeredWindows
+    global break
+
+    ; Capture the currently active window to use for the duration of the loop
+    WinGet, winId, ID, A
+    WinGetPos, winX, winY, winW, winH, A
+    winData := {id: winId, x: winX, y: winY, width: winW, height: winH}
 
     while (break = 0) {
-        for index, winData in registeredWindows {
-            if (break != 0)
-                break
-            HomeBaseLoop(winData)
-        }
-
-        ; Buffer for battle timers if looping through each window doesn't take long enough.
-        ; 60000 for single instance, for 4+ instances don't sleep
-        ; sleep 60000
+        HomeBaseLoop(winData)
     }
 }
 
@@ -139,6 +101,8 @@ HomeBaseLoop(winData) {
     SearchMatch(winData)
     Deploy(winData)
     Deploy(winData)
+
+    sleep 100000 //2:48 left after deployment. We wait for 1:40 before continuing.
 }
 
 ClearUI(winData) {
@@ -205,12 +169,7 @@ SearchMatch(winData) {
 ; Deploy at edge of map, spread out, from the furthest zoomed out state.
 Deploy(winData) {
 	global menuBarOffset, firstTroopCenterX, troopIconSize, deploymentBarBufferSize
-
-	numTroops := winData.numTroops
-	numHeroes := winData.numHero
-	hasCastle := winData.hasCastle
-	deployCastle := winData.deployCastle
-	numSpells := winData.numSpell
+	global numTroops, hasCastle, deployCastle, numHero, numSpell
 
 	Loop, %numTroops%
     {
@@ -240,7 +199,7 @@ Deploy(winData) {
 
 	; Heroic/Special
     firstHeroLocation := hasCastle ? castleBaseLocation + troopIconSize + deploymentBarBufferSize : castleBaseLocation
-    Loop, %numHeroes%
+    Loop, %numHero%
     {
         heroOffset := (A_Index - 1) * troopIconSize
         coords := ToAbsoluteCoords(winData, firstHeroLocation + heroOffset, 1250/1440)
@@ -253,11 +212,11 @@ Deploy(winData) {
 
 
 	; Cast all spells in the first spell slot, based on offset from heroes.
-	spellLocation := firstHeroLocation + (numHeroes * troopIconSize) + deploymentBarBufferSize
+	spellLocation := firstHeroLocation + (numHero * troopIconSize) + deploymentBarBufferSize
     coords := ToAbsoluteCoords(winData, spellLocation, 1250/1440)
     MouseClick, left, coords.x, coords.y
     sleep 50
-	spellsPerLine := (numSpells / 2) + 1
+	spellsPerLine := (numSpell / 2) + 1
     ClickOnLine(winData, 1390/2415, 490/1440, 975/2415, 890/1440, spellsPerLine)
     sleep 50
 }

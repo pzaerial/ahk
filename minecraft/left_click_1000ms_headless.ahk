@@ -11,5 +11,5 @@ wingettitle, w1title, ahk_id %w1id%
 
 while break < 0 {
 	ControlClick,,ahk_id %w1id%,,LEFT
-	sleep 100
+	sleep 1000
 }
