@@ -1,5 +1,6 @@
 ; Single-window homebase automation script
 ; BS windows must not be sized such that there are black bars on the side, nor sidebar open.
+; Avoid too many windows, as cpu/memory limits affect responsiveness.
 ; Ctrl+Z: Open settings | Ctrl+X: Start loop on active window | Ctrl+C: Break
 
 ; Use absolute coordinates (based on active display)
@@ -89,11 +90,11 @@ MainLoop() {
 HomeBaseLoop(winData) {
     ; Activate Window
     WinActivate, % "ahk_id " . winData.id
-    sleep 250
+    sleep 450
     centerX := winData.x + (winData.width / 2)
     centerY := winData.y + (winData.height / 2)
     MouseClick, left, centerX, centerY
-    sleep 50
+    sleep 150
 
     ; Game Loop
     ReturnHome(winData)
@@ -110,7 +111,7 @@ ClearUI(winData) {
 	global menuBarOffset
 
     ; 1s buffer to click between iterations
-	sleep 500
+	sleep 700
 
 	; Reset after connecting from another device
 	coords := ToAbsoluteCoords(winData, 790/2415, 800/1440)
@@ -120,46 +121,46 @@ ClearUI(winData) {
 	; Close Profile/League window
 	coords := ToAbsoluteCoords(winData, 2100/2415, 142/1440)
 	MouseClick, left, coords.x, coords.y
-	sleep 50
+	sleep 150
 
 	; Close Battle Window
 	coords := ToAbsoluteCoords(winData, 2220/2415, 100/1440)
 	MouseClick, left, coords.x, coords.y
-	sleep 50
+	sleep 150
 
 	; Close Chat
 	coords := ToAbsoluteCoords(winData, 990/2415, 650/1440)
 	MouseClick, left, coords.x, coords.y
-	sleep 50
+	sleep 150
 
 	; Close Battle pass window
 	coords := ToAbsoluteCoords(winData, 2140/2415, 115/1440)
 	MouseClick, left, coords.x, coords.y
-	sleep 50
+	sleep 150
 
 	; Close Training window
 	coords := ToAbsoluteCoords(winData, 2330/2415, 150/1440)
 	MouseClick, left, coords.x, coords.y
-	sleep 50
+	sleep 150
 
 	; Clear any remaining UI elements by clicking on dead space
 	coords := ToAbsoluteCoords(winData, 2400/2415, 400/1440)
 	MouseClick, left, coords.x, coords.y
-	sleep 50
+	sleep 150
 	MouseClick, left, coords.x, coords.y
-	sleep 50
+	sleep 150
 }
 
 SearchMatch(winData) {
 	; Click Start
 	coords := ToAbsoluteCoords(winData, 150/2415, 1200/1440)
 	MouseClick, left, coords.x, coords.y
-	sleep 250
+	sleep 450
 
 	; Click Find
 	coords := ToAbsoluteCoords(winData, 400/2415, 1025/1440)
 	MouseClick, left, coords.x, coords.y
-	sleep 250
+	sleep 450
 
 	; Click Attack
 	coords := ToAbsoluteCoords(winData, 2130/2415, 1250/1440)
@@ -179,10 +180,10 @@ Deploy(winData) {
 
         coords := ToAbsoluteCoords(winData, currentTroopX, 1250/1440)
         MouseClick, left, coords.x, coords.y
-        sleep 50
+        sleep 150
 
         ClickOnLine(winData, 1050/2415, 40/1440, 240/2415, 715/1440, 8)
-        sleep 50
+        sleep 150
     }
 
 	; Figure out CC Location, accounting for slight offset.
@@ -192,10 +193,10 @@ Deploy(winData) {
 	if (hasCastle && deployCastle) {
 		coords := ToAbsoluteCoords(winData, castleBaseLocation, 1250/1440)
 		MouseClick, left, coords.x, coords.y
-		sleep 50
+		sleep 150
 		coords := ToAbsoluteCoords(winData, 630/2415, 381/1440)
 		MouseClick, left, coords.x, coords.y
-		sleep 50
+		sleep 150
 	}
 
 	; Heroic/Special
@@ -205,10 +206,10 @@ Deploy(winData) {
         heroOffset := (A_Index - 1) * troopIconSize
         coords := ToAbsoluteCoords(winData, firstHeroLocation + heroOffset, 1250/1440)
         MouseClick, left, coords.x, coords.y
-        sleep 50
+        sleep 150
         coords := ToAbsoluteCoords(winData, 630/2415 + ((A_Index - 1) * 10/2415), 375/1440 + ((A_Index - 1) * 3/1440))
         MouseClick, left, coords.x, coords.y
-        sleep 50
+        sleep 150
     }
 
 
@@ -216,10 +217,10 @@ Deploy(winData) {
 	spellLocation := firstHeroLocation + (numHero * troopIconSize) + deploymentBarBufferSize
     coords := ToAbsoluteCoords(winData, spellLocation, 1250/1440)
     MouseClick, left, coords.x, coords.y
-    sleep 50
+    sleep 150
 	spellsPerLine := (numSpell / 2) + 1
     ClickOnLine(winData, 1390/2415, 490/1440, 975/2415, 890/1440, spellsPerLine)
-    sleep 50
+    sleep 150
 }
 
 ReturnHome(winData) {
@@ -231,10 +232,10 @@ ReturnHome(winData) {
 	; Surrender and Return
 	coords := ToAbsoluteCoords(winData, 150/2415, 1050/1440)
 	MouseClick, left, coords.x, coords.y
-	sleep 250
+	sleep 450
 	coords := ToAbsoluteCoords(winData, 1475/2415, 900/1440)
 	MouseClick, left, coords.x, coords.y
-	sleep 500
+	sleep 700
 	coords := ToAbsoluteCoords(winData, 1200/2415, 1200/1440)
 	MouseClick, left, coords.x, coords.y
 	sleep 2000
@@ -260,6 +261,6 @@ ClickOnLine(winData, startFracX, startFracY, endFracX, endFracY, numClicks) {
         MouseClick, left, coords.x, coords.y
 
         ; Add delay between clicks (adjust if necessary)
-        sleep, 25
+        sleep, 150
     }
 }
