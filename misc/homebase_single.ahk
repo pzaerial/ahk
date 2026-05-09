@@ -102,7 +102,8 @@ HomeBaseLoop(winData) {
     Deploy(winData)
     Deploy(winData)
 
-    sleep 100000 //2:48 left after deployment. We wait for 1:40 before continuing.
+    ; 2:48 left after deployment. We wait for 1:40 before continuing.
+    sleep 100000
 }
 
 ClearUI(winData) {
