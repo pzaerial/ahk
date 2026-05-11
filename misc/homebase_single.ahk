@@ -21,7 +21,7 @@ hasCastle := 1
 deployCastle := 0
 numHero := 4
 numSpell := 11
-sleepBetweenIterations := 100000
+sleepBetweenIterations := 20000
 
 ^c:: break++
 
