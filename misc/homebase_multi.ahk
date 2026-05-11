@@ -56,6 +56,7 @@ ShowRegisterGui() {
     global tempWinName, tempWinW, tempWinH
 
     numTroops := 2
+    clicksPerTroop := 8
     hasCastle := 1
     deployCastle := 0
     numHero := 4
@@ -67,6 +68,8 @@ ShowRegisterGui() {
     Gui, Register:Add, Text, w200, ---------------------------------
     Gui, Register:Add, Text, , Number of Troops:
     Gui, Register:Add, Edit, vNumTroopsInput w100, %numTroops%
+    Gui, Register:Add, Text, , Clicks Per Troop:
+    Gui, Register:Add, Edit, vClicksPerTroopInput w100, %clicksPerTroop%
     Gui, Register:Add, Text, , Has Castle (0/1):
     Gui, Register:Add, Edit, vHasCastleInput w100, %hasCastle%
     Gui, Register:Add, Text, , Deploy Castle (0/1):
@@ -82,7 +85,7 @@ ShowRegisterGui() {
 
 RegisterSubmit:
     Gui, Register:Submit
-    windowData := {id: tempWinId, name: tempWinName, x: tempWinX, y: tempWinY, width: tempWinW, height: tempWinH, numTroops: NumTroopsInput, hasCastle: HasCastleInput, deployCastle: DeployCastleInput, numHero: NumHeroInput, numSpell: NumSpellInput}
+    windowData := {id: tempWinId, name: tempWinName, x: tempWinX, y: tempWinY, width: tempWinW, height: tempWinH, numTroops: NumTroopsInput, clicksPerTroop: ClicksPerTroopInput, hasCastle: HasCastleInput, deployCastle: DeployCastleInput, numHero: NumHeroInput, numSpell: NumSpellInput}
     registeredWindows.Push(windowData)
 return
 
@@ -207,6 +210,7 @@ Deploy(winData) {
 	global menuBarOffset, firstTroopCenterX, troopIconSize, deploymentBarBufferSize
 
 	numTroops := winData.numTroops
+	clicksPerTroop := winData.clicksPerTroop
 	numHeroes := winData.numHero
 	hasCastle := winData.hasCastle
 	deployCastle := winData.deployCastle
@@ -221,7 +225,7 @@ Deploy(winData) {
         MouseClick, left, coords.x, coords.y
         sleep 50
 
-        ClickOnLine(winData, 1050/2415, 40/1440, 240/2415, 715/1440, 8)
+        ClickOnLine(winData, 1050/2415, 40/1440, 240/2415, 715/1440, clicksPerTroop)
         sleep 50
     }
 

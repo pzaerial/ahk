@@ -16,10 +16,12 @@ deploymentBarBufferSize := 20/2415
 
 ; Configurable settings (defaults used unless overridden via Ctrl+Z settings window)
 numTroops := 2
+clicksPerTroop := 8
 hasCastle := 1
 deployCastle := 0
 numHero := 4
 numSpell := 11
+sleepBetweenIterations := 100000
 
 ^c:: break++
 
@@ -33,11 +35,13 @@ return
 return
 
 ShowSettingsGui() {
-    global numTroops, hasCastle, deployCastle, numHero, numSpell
+    global numTroops, clicksPerTroop, hasCastle, deployCastle, numHero, numSpell, sleepBetweenIterations
 
     Gui, Settings:New, , Settings
     Gui, Settings:Add, Text, , Number of Troops:
     Gui, Settings:Add, Edit, vNumTroopsInput w100, %numTroops%
+    Gui, Settings:Add, Text, , Clicks Per Troop:
+    Gui, Settings:Add, Edit, vClicksPerTroopInput w100, %clicksPerTroop%
     Gui, Settings:Add, Text, , Has Castle (0/1):
     Gui, Settings:Add, Edit, vHasCastleInput w100, %hasCastle%
     Gui, Settings:Add, Text, , Deploy Castle (0/1):
@@ -46,6 +50,8 @@ ShowSettingsGui() {
     Gui, Settings:Add, Edit, vNumHeroInput w100, %numHero%
     Gui, Settings:Add, Text, , Number of Spells:
     Gui, Settings:Add, Edit, vNumSpellInput w100, %numSpell%
+    Gui, Settings:Add, Text, , Sleep Between Iterations (ms):
+    Gui, Settings:Add, Edit, vSleepBetweenIterationsInput w100, %sleepBetweenIterations%
     Gui, Settings:Add, Button, Default gSettingsSubmit w100, OK
     Gui, Settings:Add, Button, gSettingsCancel x+10 w100, Cancel
     Gui, Settings:Show
@@ -54,10 +60,12 @@ ShowSettingsGui() {
 SettingsSubmit:
     Gui, Settings:Submit
     numTroops := NumTroopsInput
+    clicksPerTroop := ClicksPerTroopInput
     hasCastle := HasCastleInput
     deployCastle := DeployCastleInput
     numHero := NumHeroInput
     numSpell := NumSpellInput
+    sleepBetweenIterations := SleepBetweenIterationsInput
     Gui, Settings:Destroy
 return
 
@@ -88,6 +96,8 @@ MainLoop() {
 }
 
 HomeBaseLoop(winData) {
+    global sleepBetweenIterations
+
     ; Activate Window
     WinActivate, % "ahk_id " . winData.id
     sleep 450
@@ -103,8 +113,8 @@ HomeBaseLoop(winData) {
     Deploy(winData)
     Deploy(winData)
 
-    ; 2:48 left after deployment. We wait for 1:40 before continuing.
-    sleep 100000
+    ; 2:48 left after deployment. Default 100000 (1:40) before continuing.
+    sleep %sleepBetweenIterations%
 }
 
 ClearUI(winData) {
@@ -171,7 +181,7 @@ SearchMatch(winData) {
 ; Deploy at edge of map, spread out, from the furthest zoomed out state.
 Deploy(winData) {
 	global menuBarOffset, firstTroopCenterX, troopIconSize, deploymentBarBufferSize
-	global numTroops, hasCastle, deployCastle, numHero, numSpell
+	global numTroops, clicksPerTroop, hasCastle, deployCastle, numHero, numSpell
 
 	Loop, %numTroops%
     {
@@ -182,7 +192,7 @@ Deploy(winData) {
         MouseClick, left, coords.x, coords.y
         sleep 150
 
-        ClickOnLine(winData, 1050/2415, 40/1440, 240/2415, 715/1440, 8)
+        ClickOnLine(winData, 1050/2415, 40/1440, 240/2415, 715/1440, clicksPerTroop)
         sleep 150
     }
 
