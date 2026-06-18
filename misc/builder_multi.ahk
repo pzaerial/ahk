@@ -5,7 +5,12 @@ CoordMode, Mouse, Screen
 
 break := -1
 registeredWindows := []
-menuBarOffset := 30
+
+; Emulator top bar offset (in code, not user settings). Set to "bluestacks" or "mumu".
+emulator := "mumu"
+bluestacksOffset := 30
+mumuOffset := 40
+menuBarOffset := (emulator = "mumu") ? mumuOffset : bluestacksOffset
 
 ; Fixed layout values (as fractions of 2415x1440)
 firstHeroCenterX := 250/2415
@@ -92,11 +97,14 @@ FindRegisteredWindow(winId) {
     return 0
 }
 
-; Converts fractional coords (e.g., 750/2415) to absolute screen coords with menu bar offset
+; Converts fractional coords (e.g., 750/2415) to absolute screen coords.
+; The top bar is the only border, so fractions map onto the game window
+; (full height minus the top bar), then are offset past the top bar.
 ToAbsoluteCoords(winData, fracX, fracY) {
     global menuBarOffset
+    gameHeight := winData.height - menuBarOffset
     absX := winData.x + (fracX * winData.width)
-    absY := winData.y + (fracY * winData.height) + menuBarOffset
+    absY := winData.y + menuBarOffset + (fracY * gameHeight)
     return {x: absX, y: absY}
 }
 
@@ -135,14 +143,18 @@ MainLoop() {
     }
 }
 
+; Activates a window, waits for focus, then refreshes its stored bounds in place.
 ActivateWindow(winData) {
-    ; Activate Window
     WinActivate, % "ahk_id " . winData.id
+    WinWaitActive, % "ahk_id " . winData.id, , 1
+    WinGetPos, winX, winY, winW, winH, % "ahk_id " . winData.id
+    if (winW != "") {
+        winData.x := winX
+        winData.y := winY
+        winData.width := winW
+        winData.height := winH
+    }
     sleep 250
-    centerX := winData.x + (winData.width / 2)
-    centerY := winData.y + (winData.height / 2)
-    MouseClick, left, centerX, centerY
-    sleep 50
 }
 
 ClearUI(winData) {
